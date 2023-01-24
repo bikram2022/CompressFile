@@ -137,20 +137,4 @@ public class Huffman {
 		encodedStr = sb.toString();
 		return encodedStr;
 	}
-	
-	public String decode(){
-		StringBuilder sb = new StringBuilder();
-		String t = "";
-		
-		for(int i=0; i<encodedStr.length(); i++){
-			t += encodedStr.charAt(i);
-			if (hmapCodeR.containsKey(t)){
-				sb.append(hmapCodeR.get(t));
-				t = "";
-			}
-		}
-		decodedStr = sb.toString();
-		return decodedStr;
-	}
-	
 }

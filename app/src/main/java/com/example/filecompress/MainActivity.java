@@ -5,22 +5,29 @@ import static android.app.PendingIntent.getActivity;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     String decodedResult = null;
     Uri originalFileUri = null;
     Uri encodedFileUri = null;
-    String contentToWrite =null;
+    String contentToWrite = null;
     static final int REQUEST_FILE_OPEN = 1;
     // Request code for creating a PDF document.
     private static final int CREATE_FILE = 2;
@@ -47,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
-
 
     public void openFile(View view) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -93,9 +99,10 @@ public class MainActivity extends AppCompatActivity {
             }
             writeFile(contentToWrite);
         }
+
     }
 
-    private String readTextFromUri(Uri uri) throws IOException {
+    public String readTextFromUri(Uri uri) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStream inputStream =
                      getContentResolver().openInputStream(uri);
@@ -121,10 +128,10 @@ public class MainActivity extends AppCompatActivity {
 
     public String prepareContentToWrite(String encoded, HashMap<Character, String> table) {
         StringBuilder content = new StringBuilder();
-
+        String withLeadingZeros;
+        String binaryString;
         for (HashMap.Entry<Character, String> entry : table.entrySet()) {
-            String withLeadingZeros;
-            String binaryString;
+
 
             char key = Character.valueOf(entry.getKey());
             String value = entry.getValue();
@@ -141,7 +148,10 @@ public class MainActivity extends AppCompatActivity {
                 content.append(withLeadingZeros);
             }
         }
-        content.append("+");
+//Separator
+        binaryString = Integer.toBinaryString('|');
+        withLeadingZeros = String.format("%8s", binaryString).replace(' ', '0');
+        content.append(withLeadingZeros);
 
         content.append(encoded);
 
@@ -182,8 +192,8 @@ public class MainActivity extends AppCompatActivity {
     private void createFile(Uri pickerInitialUri) {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("application/encoded");
-        intent.putExtra(Intent.EXTRA_TITLE, "test.encoded");
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TITLE, "test_encoded.txt");
 
         // Optionally, specify a URI for the directory that should be opened in
         // the system file picker when your app creates the document.
@@ -192,4 +202,103 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CREATE_FILE);
     }
 
+
+    public void decompress(View view) {
+
+        InputStream inputStream = null;
+        try {
+            inputStream = getContentResolver().openInputStream(originalFileUri);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        byte[] bytes = new byte[20000];//constant size given!!!!!!!!!
+        try {
+            inputStream.read(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String binaryString = "";
+        BitSet set = BitSet.valueOf(bytes);
+        for (int i = 0; i <= set.length(); i++) {
+            if (set.get(i)) {
+                binaryString += "1";
+            } else {
+                binaryString += "0";
+            }
+        }
+
+        Log.d("Message:", binaryString);
+
+        String parts[] = binaryString.split("01111100",2);
+        Log.d(" First Message:", parts[0]);
+        Log.d(" Second Message:", parts[1]);
+
+        String encodedHash = "";
+
+        for(int i = 0; i < parts[0].length(); i = i + 8){
+            String s = "";
+
+            s += binaryString.charAt(i);
+            s += binaryString.charAt(i+1);
+            s += binaryString.charAt(i+2);
+            s += binaryString.charAt(i+3);
+            s += binaryString.charAt(i+4);
+            s += binaryString.charAt(i+5);
+            s += binaryString.charAt(i+6);
+            s += binaryString.charAt(i+7);
+
+            char c = (char) Integer.parseInt(s,2);
+
+            encodedHash += c;
+
+        }
+
+        Log.d("Message:", encodedHash);
+
+        HashMap<Character, String> table = new HashMap<Character, String>();
+
+        Character key = null;
+        String value = "";
+        for(int i = 0; i < encodedHash.length(); i++){
+            if(encodedHash.charAt(i) != '0' && encodedHash.charAt(i) != '1'){
+                if(key != null){
+                    table.put(key,value);
+                    value = "";
+                }
+                key = encodedHash.charAt(i);
+            }
+            else{
+                value += encodedHash.charAt(i);
+            }
+        }
+        table.put(key,value);
+
+
+        Log.d("Message:", String.valueOf(table));
+
+        String ansString = "";
+        String temp = "";
+        for(int i = 0; i < parts[1].length(); i++){
+            temp+=parts[1].charAt(i);
+
+            for (Map.Entry<Character, String> entry : table.entrySet()) {
+                if(temp.equals(entry.getValue())){
+                    ansString += entry.getKey();
+                    temp = "";
+                    break;
+                }
+            }
+        }
+
+        Log.d("Message:", ansString);
+        Log.d("Message:", String.valueOf(parts.length));
+
+
+
+    }
+
 }
+
+//  { =00, a=11110, e=1010, f=1110, g=11111, h=01110, i=110, l=10000, n=10001, .=10110, o=10111, r=01111, s=010, T=0110, t=1001}

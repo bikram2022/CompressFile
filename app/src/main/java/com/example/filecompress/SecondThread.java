@@ -1,8 +1,15 @@
 package com.example.filecompress;
 
+import android.content.res.AssetFileDescriptor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +17,45 @@ public class SecondThread extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... strings) {
-        String binaryString = strings[0];
+
+        Uri uri = Uri.parse(strings[0]);
+        InputStream inputStream = null;
+        try {
+            inputStream = MainActivity.getInstance().getContentResolver().openInputStream(uri);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        AssetFileDescriptor fileDescriptor = null;
+        try {
+            fileDescriptor = MainActivity.getInstance().getApplicationContext().getContentResolver().openAssetFileDescriptor(uri , "r");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        int fileSize = (int) fileDescriptor.getLength();
+        Log.d("Size", String.valueOf(fileSize));
+
+
+        byte[] bytes = new byte[fileSize];
+        try {
+            inputStream.read(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("I am", "in middle");
+        String binaryString = "";
+        BitSet set = BitSet.valueOf(bytes);
+        for (int i = 0; i <= set.length(); i++) {
+            if (set.get(i)) {
+                binaryString += "1";
+            } else {
+                binaryString += "0";
+            }
+        }
+        Log.d("Iam","here");
+
+        Log.d("Message", "Async started");
+
         String parts[] = binaryString.split("01111100",2);
 
         String encodedHash = "";
@@ -34,44 +79,42 @@ public class SecondThread extends AsyncTask<String, Void, String> {
         }
 
 
-        HashMap<Character, String> table = new HashMap<Character, String>();
+        HashMap<String, Character> table = new HashMap<String, Character>();
 
-        Character key = null;
-        String value = "";
+        Character value = null;
+        String key = "";
         for(int i = 0; i < encodedHash.length(); i++){
-            if(encodedHash.charAt(i) != '0' && encodedHash.charAt(i) != '1'){
-                if(key != null){
-                    table.put(key,value);
-                    value = "";
-                }
-                key = encodedHash.charAt(i);
+            if(encodedHash.charAt(i) == '0' || encodedHash.charAt(i) == '1'){
+                key += encodedHash.charAt(i);
             }
             else{
-                value += encodedHash.charAt(i);
+                if(value != null){
+                    table.put(key,value);
+                    key = "";
+                }
+                value = encodedHash.charAt(i);
             }
         }
         table.put(key,value);
+
+        Log.d("Message", String.valueOf(table));
 
         String ansString = "";
         String temp = "";
         for(int i = 0; i < parts[1].length(); i++){
             temp+=parts[1].charAt(i);
-
-            for (Map.Entry<Character, String> entry : table.entrySet()) {
-                if(temp.equals(entry.getValue())){
-                    ansString += entry.getKey();
-                    temp = "";
-                    break;
-                }
+            if(table.containsKey(temp)){
+                ansString += table.get(temp);
+                temp = "";
             }
         }
-
+        Log.d("Message", "Async Ended");
         return ansString;
     }
 
     @Override
     protected void onPostExecute(String s) {
+        super.onPreExecute();
         MainActivity.getInstance().onGettingResult(s);
     }
-
 }

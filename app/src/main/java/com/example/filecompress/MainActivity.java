@@ -1,6 +1,5 @@
 package com.example.filecompress;
 
-
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Intent;
@@ -8,7 +7,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
+import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,7 +20,6 @@ import java.io.InputStreamReader;
 import java.util.BitSet;
 import java.util.Objects;
 
-
 public class MainActivity extends AppCompatActivity {
     String originalString = null;
     Huffman h = null;
@@ -27,23 +28,23 @@ public class MainActivity extends AppCompatActivity {
     Uri encodedFileUri = null;
     String contentToWrite = null;
     static final int REQUEST_FILE_OPEN = 1;
-    // Request code for creating a PDF document.
     private static final int CREATE_FILE = 2;
     private static final int CREATE_FILE_FINAL = 3;
     private static MainActivity instance;
+    public ProgressBar decodingProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         instance = this;
+        decodingProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
     }
 
     public void openFile(View view) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("text/plain");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        // Only the system receives the ACTION_OPEN_DOCUMENT, so no need to test.
         startActivityForResult(intent, REQUEST_FILE_OPEN);
     }
 
@@ -101,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
     }
 
     public String readTextFromUri(Uri uri) throws IOException {
@@ -125,8 +125,6 @@ public class MainActivity extends AppCompatActivity {
         contentToWrite = Util.prepareContentToWrite(encodedResult, h.hmapCode);
         createFile(null);
     }
-
-
 
     public void writeFile(String content) {
 
@@ -162,41 +160,18 @@ public class MainActivity extends AppCompatActivity {
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TITLE, "test_encoded.txt");
 
-        // Optionally, specify a URI for the directory that should be opened in
-        // the system file picker when your app creates the document.
         intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
 
         startActivityForResult(intent, CREATE_FILE);
     }
 
-
     public void decompress(View view) {
 
-        InputStream inputStream = null;
-        try {
-            inputStream = getContentResolver().openInputStream(originalFileUri);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Log.d("Iam","here first");
+        decodingProgressBar.setVisibility(View.VISIBLE);
 
-        byte[] bytes = new byte[200000];//constant size given!!!!!!!!!
-        try {
-            inputStream.read(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        String binaryString = "";
-        BitSet set = BitSet.valueOf(bytes);
-        for (int i = 0; i <= set.length(); i++) {
-            if (set.get(i)) {
-                binaryString += "1";
-            } else {
-                binaryString += "0";
-            }
-        }
-
-        SecondThread secondThread = (SecondThread) new SecondThread().execute(binaryString);
+        new SecondThread().execute(String.valueOf(originalFileUri));
 
     }
 
@@ -206,15 +181,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onGettingResult(String s) {
 
+        decodingProgressBar.setVisibility(View.INVISIBLE);
+
         contentToWrite = s;
 
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TITLE, "test_decoded.txt");
-
-        // Optionally, specify a URI for the directory that should be opened in
-        // the system file picker when your app creates the document.
 
         startActivityForResult(intent, CREATE_FILE_FINAL);
 

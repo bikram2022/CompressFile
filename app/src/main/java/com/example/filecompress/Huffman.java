@@ -3,10 +3,6 @@ package com.example.filecompress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Comparator;
 
 public class Huffman {

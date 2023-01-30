@@ -28,10 +28,9 @@ public class Util {
                 content.append(withLeadingZeros);
             }
         }
-//Separator
-        binaryString = Integer.toBinaryString('|');
-        withLeadingZeros = String.format("%8s", binaryString).replace(' ', '0');
-        content.append(withLeadingZeros);
+        //Separator
+
+        content.append("0000000011111111");
 
         content.append(encoded);
 

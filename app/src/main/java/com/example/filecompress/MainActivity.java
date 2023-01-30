@@ -113,8 +113,10 @@ public class MainActivity extends AppCompatActivity {
             String line;
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
+                stringBuilder.append("\n");
             }
         }
+        Log.d("Compressed String",stringBuilder.toString());
         return stringBuilder.toString();
     }
 

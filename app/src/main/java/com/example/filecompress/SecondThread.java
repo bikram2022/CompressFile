@@ -33,7 +33,6 @@ public class SecondThread extends AsyncTask<String, Void, String> {
             e.printStackTrace();
         }
         int fileSize = (int) fileDescriptor.getLength();
-        Log.d("Size", String.valueOf(fileSize));
 
 
         byte[] bytes = new byte[fileSize];
@@ -52,11 +51,8 @@ public class SecondThread extends AsyncTask<String, Void, String> {
                 binaryString += "0";
             }
         }
-        Log.d("Iam","here");
 
-        Log.d("Message", "Async started");
-
-        String parts[] = binaryString.split("01111100",2);
+        String parts[] = binaryString.split("0000000011111111",2);
 
         String encodedHash = "";
 
@@ -78,7 +74,6 @@ public class SecondThread extends AsyncTask<String, Void, String> {
 
         }
 
-
         HashMap<String, Character> table = new HashMap<String, Character>();
 
         Character value = null;
@@ -97,8 +92,6 @@ public class SecondThread extends AsyncTask<String, Void, String> {
         }
         table.put(key,value);
 
-        Log.d("Message", String.valueOf(table));
-
         String ansString = "";
         String temp = "";
         for(int i = 0; i < parts[1].length(); i++){
@@ -108,7 +101,7 @@ public class SecondThread extends AsyncTask<String, Void, String> {
                 temp = "";
             }
         }
-        Log.d("Message", "Async Ended");
+
         return ansString;
     }
 

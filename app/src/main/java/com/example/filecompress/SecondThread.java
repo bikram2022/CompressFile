@@ -54,6 +54,7 @@ public class SecondThread extends AsyncTask<String, Void, String> {
         String binaryString = binaryStringBuilder.toString();
         String parts[] = binaryString.split("0000000011111111",2);
 
+//        StringBuilder encodedHashBuilder = new StringBuilder();
         String encodedHash = "";
 
         for(int i = 0; i < parts[0].length(); i = i + 8){
@@ -77,32 +78,33 @@ public class SecondThread extends AsyncTask<String, Void, String> {
         HashMap<String, Character> table = new HashMap<String, Character>();
 
         Character value = null;
-        String key = "";
+
+        StringBuilder keyBuilder = new StringBuilder();
         for(int i = 0; i < encodedHash.length(); i++){
             if(encodedHash.charAt(i) == '0' || encodedHash.charAt(i) == '1'){
-                key += encodedHash.charAt(i);
+                keyBuilder.append(encodedHash.charAt(i));
             }
             else{
                 if(value != null){
-                    table.put(key,value);
-                    key = "";
+                    table.put(String.valueOf(keyBuilder),value);
+                    keyBuilder.setLength(0);
                 }
                 value = encodedHash.charAt(i);
             }
         }
-        table.put(key,value);
+        table.put(String.valueOf(keyBuilder),value);
 
-        String ansString = "";
+        StringBuilder ansStringBuilder = new StringBuilder();
         String temp = "";
         for(int i = 0; i < parts[1].length(); i++){
             temp+=parts[1].charAt(i);
             if(table.containsKey(temp)){
-                ansString += table.get(temp);
+                ansStringBuilder.append(table.get(temp));
                 temp = "";
             }
         }
 
-        return ansString;
+        return ansStringBuilder.toString();
     }
 
     @Override

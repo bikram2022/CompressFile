@@ -1,35 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="@color/cardview_dark_background"
+    android:background="@drawable/background"
     android:orientation="vertical"
-    android:gravity="center">
+    tools:context=".MainActivity"
+    >
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Choose file"
-        android:onClick="openFile" />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Compress"
-        android:onClick="compress"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Decompress"
-        android:onClick="decompress"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200sp"
+        android:gravity="center"
+        android:orientation="vertical">
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="openFile"
+            android:text="Choose file" />
+
+        <TextView
+            android:id="@+id/name_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:text="filename.txt"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/details_view"
+        android:layout_width="match_parent"
+        android:layout_height="200sp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="18sp"/>
     <ProgressBar
         android:id="@+id/loading_indicator"
-        android:layout_height="42dp"
         android:layout_width="42dp"
-        android:layout_gravity="center"
-        android:visibility="invisible" />
+        android:layout_height="42dp"
+        android:visibility="invisible"
+        android:layout_gravity="center_horizontal"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="250sp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20sp"
+            android:onClick="decompress"
+            android:text="Decompress" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20sp"
+            android:onClick="compress"
+            android:text="Compress" />
+    </LinearLayout>
+
+
+
 
 </LinearLayout>

@@ -1,7 +1,8 @@
 package com.example.filecompress;
 
-
-import android.util.Log;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 
 import java.util.HashMap;
 
@@ -28,7 +29,6 @@ public class Util {
             }
         }
         //Separator
-
         content.append("0000000011111111");
 
         content.append(encoded);
@@ -36,4 +36,5 @@ public class Util {
         return String.valueOf(content);
 
     }
+
 }

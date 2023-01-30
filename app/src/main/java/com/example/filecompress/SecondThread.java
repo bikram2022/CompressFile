@@ -41,17 +41,17 @@ public class SecondThread extends AsyncTask<String, Void, String> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("I am", "in middle");
-        String binaryString = "";
+        StringBuilder binaryStringBuilder = new StringBuilder();
         BitSet set = BitSet.valueOf(bytes);
         for (int i = 0; i <= set.length(); i++) {
             if (set.get(i)) {
-                binaryString += "1";
+                binaryStringBuilder.append("1");
             } else {
-                binaryString += "0";
+                binaryStringBuilder.append("0");
             }
         }
 
+        String binaryString = binaryStringBuilder.toString();
         String parts[] = binaryString.split("0000000011111111",2);
 
         String encodedHash = "";

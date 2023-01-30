@@ -20,7 +20,6 @@ public class Util {
             withLeadingZeros = String.format("%8s", binaryString).replace(' ', '0');
 
             content.append(withLeadingZeros);
-            Log.d("Message::", withLeadingZeros);
 
             for (int i = 0; i < value.length(); i++) {
                 binaryString = Integer.toBinaryString(value.charAt(i));
@@ -34,7 +33,6 @@ public class Util {
 
         content.append(encoded);
 
-        Log.d("Message::", String.valueOf(content));
         return String.valueOf(content);
 
     }

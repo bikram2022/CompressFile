@@ -111,12 +111,14 @@ public class MainActivity extends AppCompatActivity {
              BufferedReader reader = new BufferedReader(
                      new InputStreamReader(Objects.requireNonNull(inputStream)))) {
             String line;
+
+            boolean flag =  false;
             while ((line = reader.readLine()) != null) {
+                if(flag)    stringBuilder.append("\n");
                 stringBuilder.append(line);
-                stringBuilder.append("\n");
+                flag = true;
             }
         }
-        Log.d("Compressed String",stringBuilder.toString());
         return stringBuilder.toString();
     }
 
@@ -169,9 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void decompress(View view) {
 
-        Log.d("Iam","here first");
         decodingProgressBar.setVisibility(View.VISIBLE);
-
 
         new SecondThread().execute(String.valueOf(originalFileUri));
 
